@@ -1,11 +1,11 @@
 {
   "session": {
-    "active": false,
-    "started_at": null,
-    "planned_minutes": null,
-    "module": null,
-    "phase": null,
-    "checkpoint": null
+    "active": true,
+    "started_at": "2026-07-28T21:10:37Z",
+    "planned_minutes": 30,
+    "module": "00-bootstrap",
+    "phase": "teach",
+    "checkpoint": "teach: agent-separation, pass 1 of 3 (intuition), just starting"
   },
   "parking_lot": [],
   "last_closed": null
