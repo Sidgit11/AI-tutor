@@ -9,6 +9,8 @@ Announce the mode: **TEACH**. Then run the protocol below.
 
 Usually invoked from a `/standup` plan. Also legitimate on its own — if invoked cold, read `student/state.json`, `student/mastery.json`, and the latest journal entry first.
 
+All timestamps you write here — `last_touched`, journal filenames — and any time statement you make follow the standup skill's clock rule (clock-derived, never estimated), whether or not that skill's file happens to be loaded this session.
+
 ---
 
 ## 1. Three passes, in order
@@ -35,6 +37,10 @@ Good check questions force reconstruction, not recognition:
 Never multiple choice. Never yes/no.
 
 **On a wrong or partial answer:** address the gap immediately — that is what the check question is for. Do not proceed to the next pass over a broken foundation. If the wrong answer matches a pattern you have seen before from this student, log it as a misconception: add it to the concept's `misconceptions` array in `mastery.json` **and** append it to `student/misconceptions.md`.
+
+**Correcting a wrong or partial answer belongs to the pass that produced it — it is not the next pass.** Teaching the mechanism in order to explain why an answer was wrong does not discharge pass 2 (or whichever pass follows). Every pass advance requires its own check question and its own answer, in a separate exchange — no merging, no "we effectively covered it" because the correction happened to touch on later material. If the timebox forces a stop mid-concept, park the remaining passes explicitly and record honestly which passes were actually check-gated versus merely delivered — `mastery.json` evidence must distinguish the two.
+
+**The gate is not ask-once.** After a correction, ask a *different* check question on the same pass and wait — the pass advances on a correct answer to that question, never on your own judgement that the correction landed. If a correction happened to consume material from a later pass, that pass still gets its own exchange: treat the ground already covered as *reference and extend* (§4), not as delivered — its check question is never waived. The evidence label "delivered, not check-gated" may only be used when a pass was presented as its own pass in its own exchange; a correction never earns it.
 
 **Three-strikes modality rule:** if this concept has now failed three times (across reps, gates, or teaching), you are *barred* from explaining it the same way again. Switch analogy domain, decompose into smaller pieces, or design a micro-project detour. Log the switch in the journal. Repeating the same explanation louder is the canonical bad-tutor failure.
 
