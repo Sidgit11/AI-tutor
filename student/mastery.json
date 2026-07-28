@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "created": "2026-07-29",
+    "baseline": "ships-with-ai-assistance",
+    "pace_hours_per_week": "5-10",
+    "current_module": "00-bootstrap"
+  },
+  "concepts": {},
+  "gates": {
+    "00-bootstrap": { "status": "pending", "verdicts": [] },
+    "01-floor":     { "status": "locked",  "verdicts": [] }
+  },
+  "escalations": [],
+  "mode_counts": { "reps_unassisted": 0, "builds_assisted": 0 },
+  "streak": { "count": 0, "frozen": false, "last_session": null }
+}

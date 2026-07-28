@@ -1,0 +1,12 @@
+{
+  "session": {
+    "active": false,
+    "started_at": null,
+    "planned_minutes": null,
+    "module": null,
+    "phase": null,
+    "checkpoint": null
+  },
+  "parking_lot": [],
+  "last_closed": null
+}
