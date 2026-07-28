@@ -5,77 +5,7 @@
     "pace_hours_per_week": "5-10",
     "current_module": "00-bootstrap"
   },
-  "concepts": {
-    "fastapi": {
-      "mastery": 0.1,
-      "last_touched": "2026-07-28T21:25:47Z",
-      "next_review": null,
-      "evidence": [
-        "01-floor gate: no Pydantic request/response models; unhandled KeyError reaches client as 500 text/plain; auth dependency raises bare Exception instead of HTTPException"
-      ],
-      "misconceptions": [
-        "believes a health endpoint that returns 200 constitutes a health check",
-        "believes an identifier string is a credential -- treats tok-<username> as authentication with no signature and no password check",
-        "believes authentication is authorization -- no handler compares the caller to the resource owner"
-      ]
-    },
-    "typing": {
-      "mastery": 0.1,
-      "last_touched": "2026-07-28T21:25:47Z",
-      "next_review": null,
-      "evidence": [
-        "01-floor gate: entire API typed as Dict[str, Dict]; no request or response models, so no validation boundary exists"
-      ],
-      "misconceptions": []
-    },
-    "pytest": {
-      "mastery": 0.1,
-      "last_touched": "2026-07-28T21:25:47Z",
-      "next_review": null,
-      "evidence": [
-        "01-floor gate: 3 happy-path tests, all passing; 3 of 4 seeded defects (inverted auth guard, removed validation, deleted auth dependency) went undetected"
-      ],
-      "misconceptions": [
-        "believes a green suite is evidence of correctness -- tests assert only that happy paths return 200"
-      ]
-    },
-    "postgres-schema": {
-      "mastery": 0.0,
-      "last_touched": "2026-07-28T21:25:47Z",
-      "next_review": null,
-      "evidence": [
-        "01-floor gate: not demonstrated -- no database, migrations, DDL or constraints present in the submission"
-      ],
-      "misconceptions": []
-    },
-    "docker": {
-      "mastery": 0.0,
-      "last_touched": "2026-07-28T21:25:47Z",
-      "next_review": null,
-      "evidence": [
-        "01-floor gate: not demonstrated -- no Dockerfile present, image shape unverifiable"
-      ],
-      "misconceptions": []
-    },
-    "ci-github-actions": {
-      "mastery": 0.0,
-      "last_touched": "2026-07-28T21:25:47Z",
-      "next_review": null,
-      "evidence": [
-        "01-floor gate: not demonstrated -- no workflow file, no lint or type-check configuration present"
-      ],
-      "misconceptions": []
-    },
-    "structured-logging": {
-      "mastery": 0.0,
-      "last_touched": "2026-07-28T21:25:47Z",
-      "next_review": null,
-      "evidence": [
-        "01-floor gate: not demonstrated -- zero logging calls in the source; only output during failures was a raw stderr traceback"
-      ],
-      "misconceptions": []
-    }
-  },
+  "concepts": {},
   "gates": {
     "00-bootstrap": {
       "status": "pending",
@@ -83,68 +13,7 @@
     },
     "01-floor": {
       "status": "locked",
-      "verdicts": [
-        {
-          "rubric": "01-floor-gate",
-          "graded_at": "2026-07-28T21:25:47Z",
-          "model": "claude-opus-5[1m]",
-          "criteria": [
-            {
-              "id": "c1",
-              "verdict": "fail",
-              "evidence": "Ran a malformed-payload sweep against every write endpoint via fastapi.testclient. 13 of ~20 cases returned 500 with body 'Internal Server Error' and Content-Type text/plain (empty object, explicit nulls, wrong field types, syntactically broken JSON, truncated body, no body, quantity as a non-numeric string, 1e309, NaN); server-side traceback captured: app.py:55 'quantity = int(body[\"quantity\"])' -> KeyError: 'quantity'. Worse, invalid input was also ACCEPTED with 200: quantity=-1 stored as -1; a 5,000,000-character name stored whole; Content-Type text/plain accepted as JSON; an 800-level nested array stored as the value of the 'name' string field; a NUL byte and an RTL-override character stored unfiltered. There is no error envelope at all -- the only structured 4xx observed came from FastAPI's own path-param coercion ('/items/abc' -> 422), so shapes are inconsistent across the surface. Injection/template probes (SQL fragments, {{7*7}}, ${7*7}, ../../etc/passwd) were stored and echoed inertly with no evaluation -- the one sub-case that passed."
-            },
-            {
-              "id": "c2",
-              "verdict": "fail",
-              "evidence": "Not executable as specified, and fails on the executable substitute. grep for psycopg/asyncpg/sqlalchemy/postgres/DATABASE_URL across app.py and test_app.py returned zero matches: there is no database, no connection pool, and no timeout to configure, so 'stop the DB', 'kill a connection mid-request', and 'recover without a restart' cannot be run. State lives in module-global dicts (users_db, items_db, next_item_id). Executed substitute: destroying the backing store at runtime made GET /items return 500 'Internal Server Error' (unstructured, text/plain) while /health kept returning 200 {'status':'ok'}; reloading the module (process-restart analog) left 0 of 100 previously written rows. 100 concurrent creates all returned 200 with 0 lost writes -- the only sub-case that passed."
-            },
-            {
-              "id": "c3",
-              "verdict": "fail",
-              "evidence": "Total authentication compromise, executed. Tokens are minted as 'tok-<username>' by POST /login, which never checks the password, and get_current_user accepts ANY string beginning with 'tok' and derives identity by string-stripping it. Sending 'Authorization: Bearer tok-bob' from an unauthenticated client returned 200 with bob's record. Every invalid-credential case returned 500, not 401: no header (KeyError on request.headers['authorization']), 'Bearer' with no value, a random token, and a token in the query string. A token for a never-registered user ('tok-ghostuser') returned 200. Cross-user authorization: as alice, GET /items/1 returned bob's item in full ({'name':'bobs-private-item','owner':'bob'}), and DELETE /items/1 returned {'success': true} and actually destroyed it -- no handler compares current_user to the resource owner anywhere in app.py. Mass-assignment of 'owner' was ignored (the one sub-case that passed)."
-            },
-            {
-              "id": "c4",
-              "verdict": "fail",
-              "evidence": "No schema exists. There are no migrations, no DDL, no SQL files and no database driver in the submission, so 'migrations run against an empty database' could not be executed; there are consequently zero tables, zero foreign keys, zero ON DELETE behaviours, zero DB-level constraints, and no timestamptz (no timestamps at all). Credential leakage confirmed by response capture: POST /register with password 'hunter2' returned {'username':'carol','password_hash':'sha256$2retnuh'} and GET /me returned the same -- and the 'hash' is the plaintext password reversed (app.py:32, password[::-1]), so this is plaintext credential disclosure with a label on it, not a hash. Pagination absent: after inserting 500 rows, GET /items returned all 501 rows in one unbounded body; the handler is 'return list(items_db.values())' with no limit or offset parameters."
-            },
-            {
-              "id": "c5",
-              "verdict": "fail",
-              "evidence": "Executed the suite: 3 passed in 0.19s (test_health, test_register, test_login). All four required auth-boundary tests are missing -- there is no test sending no credential, no test sending a malformed credential, no test for an expired credential (the token format carries no expiry to test), and no test using a valid credential against another user's resource. The suite contains no assertion about status 401 or 403 anywhere. It also runs entirely against in-process module-global dicts, not a real Postgres, which the rubric fails independently."
-            },
-            {
-              "id": "c6",
-              "verdict": "fail",
-              "evidence": "No pipeline exists to run: there is no .github/ directory, no workflow YAML, no Dockerfile, no requirements/pyproject manifest, and the directory is not a git repository ('fatal: not a git repository'), so the criterion cannot be executed as written. Executed the strongest available substitute -- seeded four defects one at a time into a copy and ran the submitted suite. 3 of 4 went undetected: inverting the token guard so every valid token is rejected and every invalid one accepted -> 3 passed; removing quantity validation entirely -> 3 passed; deleting the authorization dependency from GET /items/{item_id} outright -> 3 passed. Only changing /register's success status 200 -> 201 went red ('assert 201 == 200'), and it caught a status code, not a security defect."
-            },
-            {
-              "id": "c7",
-              "verdict": "fail",
-              "evidence": "Could not be executed: there is no workflow file anywhere in the submission (find for *.yml/*.yaml returned nothing outside .pytest_cache), so there is nothing to inspect for checkout/install/lint/type-check/test steps, no Postgres service container, and no action versions or runtimes to check against the currently-supported set. There is also no lint or type-check configuration of any kind (no ruff, no mypy, no pyproject.toml)."
-            },
-            {
-              "id": "c8",
-              "verdict": "fail",
-              "evidence": "Could not be executed as a deployment: no public URL, no container, no host configuration, and no process manager are present. The README's documented run command was executed literally -- 'python app.py' exited 0 in under a second having bound no port, because app.py contains no __main__ block and no uvicorn.run call, so the documented path never starts a service. Health honesty was executed in-process and fails: /health is 'return {\"status\": \"ok\"}' with no dependency check, and it returned 200 {'status':'ok'} unchanged while the backing store was destroyed and GET /items was simultaneously returning 500. A health check that cannot fail reports nothing."
-            },
-            {
-              "id": "c9",
-              "verdict": "fail",
-              "evidence": "Could not be executed: there is no Dockerfile, so no image can be built or inspected -- multi-stage build, USER directive, non-root runtime, and absence of build tooling in the runtime layer are all unverifiable and therefore unpassable. There is no git repository, so git log -p and git log --all --full-history could not be run for committed credentials. There is no .gitignore in the submission and no .env handling: grep for os.environ/getenv/DATABASE_URL across the source returned zero matches, so no configuration comes from the environment. Separately, the reversible password encoding at app.py:32 is a credential-handling defect regardless of packaging."
-            },
-            {
-              "id": "c10",
-              "verdict": "fail",
-              "evidence": "Followed the 10-line README literally from the target directory. Its only instruction, 'python app.py', executed and exited 0 with no output and no listening socket -- a documented command that does not do what it documents. The README does not cover local setup, how to run the tests, the schema, the auth model, or the error envelope; a stranger could not run the test suite from it (the actual invocation requires installing fastapi/httpx/pytest, which the README never mentions and no manifest declares). Logs: grep for logging/logger across the source returned zero matches -- the application emits no log lines at all, so there is nothing structured, no correlation id, and no log levels; the only output produced during the failure scenarios was an uncaught Python traceback on stderr. No portfolio write-up exists in the submission (the directory contains exactly app.py, test_app.py, README.md)."
-            }
-          ],
-          "overall": "fail",
-          "highest_leverage_gap": "The bearer token is an unsigned, self-asserting string of the form tok-<username> that /login issues without checking the password and that no handler ever compares against a resource owner, so any caller can mint any user's identity and read or delete their data -- nothing else is worth fixing until credentials are unforgeable and ownership is checked on every access.",
-          "regrade_of": null
-        }
-      ]
+      "verdicts": []
     }
   },
   "escalations": [],
