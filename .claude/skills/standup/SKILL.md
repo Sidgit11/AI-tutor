@@ -21,7 +21,7 @@ Read all three, silently, before your first line of output:
 
 Also read `student/profile.md` if you have not read it this session, and `student/misconceptions.md` if it has entries.
 
-Never open a session from memory. If runtime compaction has occurred mid-session, re-read these files silently and continue — do not announce the re-read.
+Never open a session from memory. If runtime compaction has occurred mid-session, re-read these files silently and continue — do not announce the re-read. Then run `python3 tools/state.py verify` — it catches a hand-edit or a crashed partial write before you plan on top of it; if it fails, stop and tell the student the model is corrupt rather than continue.
 
 ## 2. Check for an interrupted session
 
@@ -62,20 +62,13 @@ Note: the `review` phase (spaced repetition, examiner agent) is **v0.2 and not a
 
 ## 5. Open the session
 
-Once the plan is approved, write to `state.json`:
+Once the plan is approved, open it:
 
 ```
-session.active         = true
-session.started_at     = <ISO-8601 timestamp now, UTC, explicit Z or offset>
-session.planned_minutes = <the budget>
-session.module         = <mastery.json.meta.current_module>
-session.phase          = <the first phase you are entering>
-session.checkpoint     = "<one sentence: what is about to happen>"
+python3 tools/state.py session open --minutes <budget> --module <mastery.json.meta.current_module> --phase <first phase> --checkpoint "<one sentence: what is about to happen>"
 ```
 
-`phase` must be one of: `review | teach | rep | build | grade | close`.
-
-`started_at` — and every other timestamp written to any state file or journal, including `parking_lot[].added` and `last_closed` — is read from the system clock, never composed from memory or inferred from context, in the UTC ISO-8601 format above. Same rule as §6.
+`phase` must be one of: `review | teach | rep | build | grade | close`. The tool stamps `started_at` from the system clock — every timestamp you write anywhere, including journal dates, follows that same clock rule (§6), never memory or inference.
 
 Then announce the mode and begin. Openings are two lines maximum.
 
@@ -94,6 +87,8 @@ A good checkpoint names the concept, the position within it, and what comes next
 A bad checkpoint is `"working on module 1"` — it does not let a cold session resume.
 
 **Append to the journal as you go, not only at close.** Open `student/journal/<YYYY-MM-DD>.md` at the first phase boundary and append to it throughout. If the runtime dies mid-session, everything up to the last boundary must already be on disk.
+
+**The only writer.** Every mutation of `student/mastery.json` and `student/state.json` goes through `python3 tools/state.py` — never hand-edit either file. It refuses anything that violates the SPEC section 4 schema (nothing lands; the error names the offending path), generates every timestamp itself, and prints what it wrote — e.g. `state.py concept touch tool-calling --mastery 0.4 --evidence "taught: pass 1 check-gated"` or `state.py park "still owes: the retry-jitter rep from the 12th"`. Full interface: `python3 tools/state.py --help` — that's the source of truth, not this paragraph.
 
 ### The clock is not a feeling
 
@@ -115,13 +110,11 @@ At the first turn at or after 90% of `planned_minutes` (81 minutes into a 90-min
 
 > We're at the 90% mark — landing the plane.
 
-Every unfinished thread goes to `state.json.parking_lot` as:
+Every unfinished thread goes to the parking lot:
 
-```json
-{ "item": "<one sentence, specific enough to resume cold>", "added": "<ISO timestamp>" }
 ```
-
-Every entry is that object, with both keys — never a bare string. The same holds for every array of objects the schemas define: `escalations` entries are `{date, concept, rung}`, `gates.<module>.verdicts` entries follow the grader verdict schema (SPEC §4). Shape is part of the schema, not a stylistic choice.
+python3 tools/state.py park "<one sentence, specific enough to resume cold>"
+```
 
 Sessions do not sprawl. Threads do not silently drop. If the student explicitly asks to continue past the timebox, that is their call — grant it without argument, and reset the landing point.
 
@@ -136,12 +129,16 @@ Run this sequence in order. All of it, every time.
    - escalations that occurred, with rung
    - anything the grader returned
    - **next-session seed** — one line naming where to pick up
-2. **Mastery.** Update every concept touched in `mastery.json`: `mastery` score, `last_touched` = today, `evidence` entries (short, factual — `"taught: pass 1-3, check questions passed"`, `"rep-003: passed 4/5, failed the timeout case"`). Add any new `misconceptions`, and mirror recurring patterns into `student/misconceptions.md`. Increment `mode_counts` where applicable. Leave `next_review` alone — that is the examiner's field, v0.2.
-   - **The shapes of `student/mastery.json` and `student/state.json` are fixed by SPEC section 4.** You may write values into the keys that schema defines; you may never add a key it does not define, at any nesting level, for any reason — not to preserve context, not to annotate, not "temporarily."
-   - If something needs recording that the schema has no place for, it goes in the journal, which is free-form and exists precisely for that.
-   - Before writing either file, confirm the key you are setting already exists in the schema.
-3. **State.** `session.active = false`, `last_closed = <ISO now>`, `session.checkpoint` = a closing summary line. Keep the parking lot.
-4. **Streak.** `streak.count` +1 if this session covered real work. `streak.frozen` is set only when the student declares a break. Streaks never reset punitively. An explicit student request to clear a streak is honoured — that is not punitive — but the prior value and the reason belong in the journal, not in a new field.
-5. **Report** in three lines maximum: what moved, what's parked, what's next.
+2. **Mastery.** For every concept touched:
+   ```
+   python3 tools/state.py concept touch <concept-id> --mastery <0.0-1.0> --evidence "<short, factual>"
+   python3 tools/state.py concept misconception <concept-id> "<text>"   # if one surfaced
+   python3 tools/state.py mode rep-unassisted   # or build-assisted — wherever applicable
+   ```
+   Evidence should read like `"taught: pass 1-3, check questions passed"` or `"rep-003: passed 4/5, failed the timeout case"` — factual, not evaluative. Mirror recurring misconceptions into `student/misconceptions.md` by hand; the tool prints a reminder to do so. `next_review` stays untouched — it's the examiner's field (v0.2) and the tool refuses to write it.
+3. **State.** `python3 tools/state.py session close --checkpoint "<closing summary line>"` — sets `session.active = false` and stamps `last_closed`. The parking lot is untouched.
+4. **Streak.** `python3 tools/state.py streak increment` if this session covered real work; `streak freeze` only when the student declares a break; `streak clear --reason "<text>"` only on an explicit student request — never punitive. `streak clear` prints the journal note it still owes you — write it.
+5. **Verify.** `python3 tools/state.py verify` — both files must pass before you report the close. A failure means this session corrupted the student model; say so instead of reporting a clean close.
+6. **Report** in three lines maximum: what moved, what's parked, what's next.
 
 If the student vanishes mid-session, steps 1–3 have already been happening incrementally per §6 — that is the whole point.

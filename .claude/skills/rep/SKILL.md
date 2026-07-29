@@ -26,7 +26,7 @@ Try to run it first, with the exact command you're about to hand the student (`u
 If that exact command actually fails to execute — not "seems likely to," a real attempt that errored — do all three, every time, quoting the **actual error output**, not a summary of it:
 1. **Disclose it plainly, once, at handover** — quote the error, and say what you verified by reading the test and stub instead of running them.
 2. **Tell the student what a healthy first run looks like** — the expected failures — so a collection or import error is immediately distinguishable from the intended failures, and instruct them to run the suite before writing a line.
-3. **Park a verification task in `state.json.parking_lot`**, naming what would actually fix it and who must act — you cannot change your own sandbox — e.g. `"pytest blocked by sandbox, needs raising with the student at next standup"`. Close it the moment the student's first run matches the predicted failures from step 2 — their run is the verification. One open item per environment root cause, never one per rep.
+3. **Park a verification task**, naming what would actually fix it and who must act — you cannot change your own sandbox: `python3 tools/state.py park "pytest blocked by sandbox, needs raising with the student at next standup"`. Clear it the moment the student's first run matches the predicted failures from step 2 (`park clear <index>`) — their run is the verification. One open item per environment root cause, never one per rep.
 
 If the same execution failure recurs across sessions, it stops being a disclosure and becomes a defect to be fixed — log it in the journal as such.
 
@@ -59,8 +59,8 @@ The exception remains unchanged: the student may **explicitly request rung 4 at 
 
 **Log every rung ≥ 3** to `mastery.json.escalations` **at the moment you deliver the rung** — not at close, not "later in the session." A session that ends abruptly must still carry the escalation record. Write it before you deliver the rung or report having done so — never announce it logged and then deliver late or skip it (standup skill §6: write, then report):
 
-```json
-{ "date": "<ISO date>", "concept": "<kebab-case-concept-id>", "rung": 3 }
+```
+python3 tools/state.py escalation log --concept <kebab-case-concept-id> --rung 3
 ```
 
 ## 4. If AI-generated code appears
@@ -79,14 +79,8 @@ A rep ends when the tests pass **or** when the time is up. Both are legitimate e
 2. **Link to prior misconceptions** where relevant: *"This is the same conflation that got you in rep 002 — you're treating awaiting as parallelism again."*
 3. **Say what was hard and why**, specifically. If they got it in eight minutes, say the exercise was too easy and the next one steps up.
 
-Then update `student/mastery.json`:
+Then run `python3 tools/state.py mode rep-unassisted` (or `build-assisted`, per §4) and `python3 tools/state.py concept touch <concept-id> --mastery <0.0-1.0> --evidence "<factual, specific>"`. Reps move `mastery` more than teaching does — an unassisted pass is real evidence. Evidence should be factual and specific: `"rep-003 unassisted: passed 5/6, failed the empty-input case, rung-2 hint on the generator"`. If the pass/fail facts came from the student's report rather than a run you observed (§1 fallback), mark it as such: `"rep-003 unassisted, student-reported: passed 5/6 per their run"`. If a pattern showed up, log it with `concept misconception <concept-id> "<text>"` and mirror it into `student/misconceptions.md` by hand — the tool prints a reminder to do so.
 
-- `mode_counts.reps_unassisted` +1 (or `builds_assisted` +1 per §4)
-- the concept's `mastery` — reps move this number more than teaching does; an unassisted pass is real evidence
-- `last_touched` = today
-- `evidence` — factual and specific: `"rep-003 unassisted: passed 5/6, failed the empty-input case, rung-2 hint on the generator"`. If the pass/fail facts came from the student's report rather than a run you observed (§1 fallback), mark it as such: `"rep-003 unassisted, student-reported: passed 5/6 per their run"`.
-- `misconceptions` — append any pattern that showed up, and mirror it into `student/misconceptions.md`
-
-Update `state.json.session.checkpoint` and append the rep to today's journal entry before moving on.
+Then `python3 tools/state.py session checkpoint "<text>"` and append the rep to today's journal entry before moving on.
 
 Failing a rep is the system working. A rep that everyone passes measured nothing.

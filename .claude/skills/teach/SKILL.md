@@ -64,12 +64,10 @@ Repetition is the examiner's job (v0.2), and it works by retrieval, not re-expla
 
 **Create the concept entry in `student/mastery.json` as soon as the first pass completes its check question — not after pass 3.** Update the same entry as further passes complete. A timeboxed partial teach still writes something; it is never allowed to leave `concepts` looking like nothing happened. Make the write before you tell the student it's done (standup skill §6: write, then report).
 
-- create the concept entry if absent — key is **kebab-case** (`async-python`, `tool-calling`, `structured-outputs`)
-- `mastery` — raise it to reflect *how much was actually check-gated*, not *mastered*. One pass earns less than three passes; teaching alone still caps out around 0.4–0.5 even at three passes — mastery above that is earned by reps and grader verdicts, not by listening.
-- `last_touched` = today
+Run `python3 tools/state.py concept touch <concept-id> --mastery <0.0-1.0> --evidence "<which passes were delivered and check-gated>"` — it creates the concept entry if absent and stamps `last_touched` itself; `next_review` stays untouchable (examiner's field, v0.2). Log `concept misconception <concept-id> "<text>"` if a check question surfaced one.
+
+- `mastery` — raise it to reflect *how much was actually check-gated*, not *mastered*. One pass earns less than three; teaching alone still caps out around 0.4–0.5 even at three passes — mastery above that is earned by reps and grader verdicts, not by listening.
 - `evidence` — state exactly which passes were delivered **and** check-gated, e.g. `"taught: pass 1 check-gated, pass 2 delivered and check-gated, pass 3 parked for timebox"`. A pass that was merely delivered without its own check question is recorded as such and never counted as check-gated.
-- `misconceptions` — append anything surfaced by a check question
-- leave `next_review` alone (examiner's field, v0.2)
 
 Then update `state.json.session.checkpoint` and append to today's journal entry before moving to the next phase.
 
