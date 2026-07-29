@@ -57,7 +57,7 @@ Never skip rungs to be kind. Never jump to 4 because 1 didn't land instantly —
 
 The exception remains unchanged: the student may **explicitly request rung 4 at any time**. Grant it immediately, without moralizing, without a lecture about learning better the hard way. It is a signal, not a sin.
 
-**Log every rung ≥ 3** to `mastery.json.escalations`:
+**Log every rung ≥ 3** to `mastery.json.escalations` **at the moment you deliver the rung** — not at close, not "later in the session." A session that ends abruptly must still carry the escalation record. Write it before you deliver the rung or report having done so — never announce it logged and then deliver late or skip it (standup skill §6: write, then report):
 
 ```json
 { "date": "<ISO date>", "concept": "<kebab-case-concept-id>", "rung": 3 }

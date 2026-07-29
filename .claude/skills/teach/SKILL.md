@@ -62,7 +62,7 @@ Repetition is the examiner's job (v0.2), and it works by retrieval, not re-expla
 
 ## 5. Update the student model as you go
 
-**Create the concept entry in `student/mastery.json` as soon as the first pass completes its check question — not after pass 3.** Update the same entry as further passes complete. A timeboxed partial teach still writes something; it is never allowed to leave `concepts` looking like nothing happened.
+**Create the concept entry in `student/mastery.json` as soon as the first pass completes its check question — not after pass 3.** Update the same entry as further passes complete. A timeboxed partial teach still writes something; it is never allowed to leave `concepts` looking like nothing happened. Make the write before you tell the student it's done (standup skill §6: write, then report).
 
 - create the concept entry if absent — key is **kebab-case** (`async-python`, `tool-calling`, `structured-outputs`)
 - `mastery` — raise it to reflect *how much was actually check-gated*, not *mastered*. One pass earns less than three passes; teaching alone still caps out around 0.4–0.5 even at three passes — mastery above that is earned by reps and grader verdicts, not by listening.

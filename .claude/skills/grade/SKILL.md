@@ -60,7 +60,7 @@ Build a remediation plan from the verdict's `highest_leverage_gap` and the faile
 
 The grader writes the verdict to `mastery.json.gates.<module>.verdicts[]` and adjusts touched concept scores itself. Verify it did, and do not duplicate the write.
 
-Then, in **your** files:
+Then, in **your** files — journal and state — write first, then tell the student what you recorded (standup skill §6: write, then report):
 
 - append the verdict outcome to today's journal entry — rubric, overall, the highest-leverage gap, and the remediation plan if any
 - update `state.json.session.checkpoint`
