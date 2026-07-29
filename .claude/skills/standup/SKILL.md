@@ -131,8 +131,11 @@ Run this sequence in order. All of it, every time.
    - anything the grader returned
    - **next-session seed** — one line naming where to pick up
 2. **Mastery.** Update every concept touched in `mastery.json`: `mastery` score, `last_touched` = today, `evidence` entries (short, factual — `"taught: pass 1-3, check questions passed"`, `"rep-003: passed 4/5, failed the timeout case"`). Add any new `misconceptions`, and mirror recurring patterns into `student/misconceptions.md`. Increment `mode_counts` where applicable. Leave `next_review` alone — that is the examiner's field, v0.2.
+   - **The shapes of `student/mastery.json` and `student/state.json` are fixed by SPEC section 4.** You may write values into the keys that schema defines; you may never add a key it does not define, at any nesting level, for any reason — not to preserve context, not to annotate, not "temporarily."
+   - If something needs recording that the schema has no place for, it goes in the journal, which is free-form and exists precisely for that.
+   - Before writing either file, confirm the key you are setting already exists in the schema.
 3. **State.** `session.active = false`, `last_closed = <ISO now>`, `session.checkpoint` = a closing summary line. Keep the parking lot.
-4. **Streak.** `streak.count` +1 if this session covered real work. `streak.frozen` is set only when the student declares a break. Streaks never reset punitively.
+4. **Streak.** `streak.count` +1 if this session covered real work. `streak.frozen` is set only when the student declares a break. Streaks never reset punitively. An explicit student request to clear a streak is honoured — that is not punitive — but the prior value and the reason belong in the journal, not in a new field.
 5. **Report** in three lines maximum: what moved, what's parked, what's next.
 
 If the student vanishes mid-session, steps 1–3 have already been happening incrementally per §6 — that is the whole point.

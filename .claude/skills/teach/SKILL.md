@@ -60,14 +60,14 @@ Before teaching, check the journal. If this concept has been taught before, you 
 
 Repetition is the examiner's job (v0.2), and it works by retrieval, not re-explanation.
 
-## 5. Update the student model on completion
+## 5. Update the student model as you go
 
-When all three passes are done, update the concept in `student/mastery.json`:
+**Create the concept entry in `student/mastery.json` as soon as the first pass completes its check question — not after pass 3.** Update the same entry as further passes complete. A timeboxed partial teach still writes something; it is never allowed to leave `concepts` looking like nothing happened.
 
 - create the concept entry if absent — key is **kebab-case** (`async-python`, `tool-calling`, `structured-outputs`)
-- `mastery` — raise it to reflect *taught and checked*, not *mastered*. Teaching alone caps out around 0.4–0.5; mastery above that is earned by reps and grader verdicts, not by listening.
+- `mastery` — raise it to reflect *how much was actually check-gated*, not *mastered*. One pass earns less than three passes; teaching alone still caps out around 0.4–0.5 even at three passes — mastery above that is earned by reps and grader verdicts, not by listening.
 - `last_touched` = today
-- `evidence` — append a short factual string: `"taught: pass 1-3, check questions passed"`, or `"taught: pass 1-2, pass 3 parked — check question on pass 2 needed a second attempt"`
+- `evidence` — state exactly which passes were delivered **and** check-gated, e.g. `"taught: pass 1 check-gated, pass 2 delivered and check-gated, pass 3 parked for timebox"`. A pass that was merely delivered without its own check question is recorded as such and never counted as check-gated.
 - `misconceptions` — append anything surfaced by a check question
 - leave `next_review` alone (examiner's field, v0.2)
 

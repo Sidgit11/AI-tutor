@@ -53,7 +53,9 @@ When the student asks for help or is clearly stuck, climb the ladder **one rung 
 
 Never skip rungs to be kind. Never jump to 4 because 1 didn't land instantly — give them the silence to think.
 
-The student may **explicitly request rung 4 at any time**. Grant it immediately, without moralizing, without a lecture about learning better the hard way. It is a signal, not a sin.
+**One message delivers at most one rung.** Bundling rung 3 and rung 4 together is skipping a rung, whatever the intent — it removes the student's chance to get unstuck at the cheaper rung, which is the entire point of the ladder having rungs. After delivering a rung, stop and let the student work. Do not pre-empt the next rung because you expect it will be needed.
+
+The exception remains unchanged: the student may **explicitly request rung 4 at any time**. Grant it immediately, without moralizing, without a lecture about learning better the hard way. It is a signal, not a sin.
 
 **Log every rung ≥ 3** to `mastery.json.escalations`:
 
