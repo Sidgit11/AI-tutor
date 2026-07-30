@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r \".tool_input.file_path // .tool_response.filePath // empty\" | { read -r f; case \"$f\" in */student/mastery.json|*/student/state.json) r=\"${f%/student/*}\"; python3 \"$r/tools/state.py\" --root \"$r\" verify >&2 || exit 2 ;; esac; }",
+            "timeout": 30,
+            "statusMessage": "Verifying student model against SPEC §4"
+          }
+        ]
+      }
+    ]
+  }
+}
